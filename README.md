@@ -40,6 +40,68 @@ The first registered user becomes **admin**; subsequent users are **user**.
 
 Volumes persist Postgres data, uploads, and generated PDFs.
 
+## Production on EC2
+
+Use the base compose file for local development and the production overlay for EC2:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production up -d --build
+```
+
+### Why the production overlay exists
+
+- Keeps the local workflow unchanged.
+- Avoids binding the frontend container directly to host port `80`, which conflicts with host-level Nginx.
+- Binds the frontend to `127.0.0.1:8080` and the backend to `127.0.0.1:8000` so only Nginx is public.
+- Removes the public PostgreSQL port mapping.
+- Adds restart policies and a backend healthcheck.
+
+### Production setup steps
+
+1. Copy the production env template:
+
+   ```bash
+   cp .env.production.example .env.production
+   ```
+
+2. Edit `.env.production` and set real values:
+
+   - `SECRET_KEY`
+   - `POSTGRES_PASSWORD`
+   - `CORS_ORIGINS`
+   - `VITE_API_URL`
+   - optionally `DATABASE_URL` if you use AWS RDS instead of the bundled Postgres container
+
+3. Start the stack:
+
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production up -d --build
+   ```
+
+4. Install the sample Nginx site config from `deploy/nginx/reportingsaas.conf`, replace `example.com`, then enable it:
+
+   ```bash
+   sudo cp deploy/nginx/reportingsaas.conf /etc/nginx/sites-available/reportingsaas
+   sudo nano /etc/nginx/sites-available/reportingsaas
+   sudo ln -s /etc/nginx/sites-available/reportingsaas /etc/nginx/sites-enabled/reportingsaas
+   sudo nginx -t
+   sudo systemctl restart nginx
+   ```
+
+5. Add HTTPS:
+
+   ```bash
+   sudo certbot --nginx -d example.com -d www.example.com
+   ```
+
+### Production notes
+
+- Do not expose PostgreSQL publicly in production.
+- Keep only ports `22`, `80`, and `443` open in the EC2 security group.
+- Prefer a read-only GitHub deploy key on the server.
+- Consider AWS RDS for PostgreSQL if this moves beyond a single-instance deployment.
+- Back up the database, uploads, and generated reports.
+
 ## Local development (without Docker UI)
 
 ### Database
