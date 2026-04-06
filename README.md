@@ -30,10 +30,10 @@ The first registered user becomes **admin**; subsequent users are **user**.
 
    Set `SECRET_KEY` to a long random string. Adjust `VITE_API_URL` if ports differ (browser must reach the API; default `http://localhost:8000`).
 
-2. Build and run:
+2. Build and run with the local-development overlay:
 
    ```bash
-   docker compose up --build
+   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
    ```
 
 3. Open **http://localhost** for the UI and **http://localhost:8000/docs** for OpenAPI. Register, upload a `.csv` or `.xlsx`, then open the dashboard and generate a PDF report.
@@ -42,19 +42,18 @@ Volumes persist Postgres data, uploads, and generated PDFs.
 
 ## Production on EC2
 
-Use the base compose file for local development and the production overlay for EC2:
+Use the base compose file plus the production overlay for EC2:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production up -d --build
 ```
 
-### Why the production overlay exists
+### Why the compose files are split
 
-- Keeps the local workflow unchanged.
-- Avoids binding the frontend container directly to host port `80`, which conflicts with host-level Nginx.
-- Binds the frontend to `127.0.0.1:8080` and the backend to `127.0.0.1:8001` so only Nginx is public.
-- Removes the public PostgreSQL port mapping.
-- Adds restart policies and a backend healthcheck.
+- `docker-compose.yml` contains the shared services and no host-port bindings.
+- `docker-compose.dev.yml` exposes the local-friendly ports: UI on `80`, API on `8000`, Postgres on `5432`.
+- `docker-compose.prod.yml` exposes only loopback ports for Nginx: UI on `127.0.0.1:8080`, API on `127.0.0.1:8001`.
+- This avoids the merge problem where local ports leaked into production and caused EC2 conflicts on ports `80` and `8000`.
 
 ### Production setup steps
 
@@ -106,10 +105,10 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.
 
 ### Database
 
-Run Postgres 16 locally and create DB/user matching `DATABASE_URL`, or use only the `postgres` service:
+Run Postgres 16 locally and create DB/user matching `DATABASE_URL`, or expose only the `postgres` service with the dev overlay:
 
 ```bash
-docker compose up -d postgres
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d postgres
 ```
 
 ### Backend
