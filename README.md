@@ -52,7 +52,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.
 
 - Keeps the local workflow unchanged.
 - Avoids binding the frontend container directly to host port `80`, which conflicts with host-level Nginx.
-- Binds the frontend to `127.0.0.1:8080` and the backend to `127.0.0.1:8000` so only Nginx is public.
+- Binds the frontend to `127.0.0.1:8080` and the backend to `127.0.0.1:8001` so only Nginx is public.
 - Removes the public PostgreSQL port mapping.
 - Adds restart policies and a backend healthcheck.
 

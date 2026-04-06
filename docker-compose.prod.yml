@@ -14,7 +14,7 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:-https://example.com}
       DEBUG: "false"
     ports:
-      - "127.0.0.1:8000:8000"
+      - "127.0.0.1:8001:8000"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)\""]
