@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   Bar,
   BarChart,
@@ -44,6 +45,8 @@ export default function BiAnalytics({ datasetId, dateFrom, dateTo }) {
   const [summary, setSummary] = useState(null)
   const [charts, setCharts] = useState(null)
   const [insights, setInsights] = useState(null)
+  const [insightsBlocked, setInsightsBlocked] = useState(false)
+  const [summaryBlockedUpgrade, setSummaryBlockedUpgrade] = useState(false)
   const [loading, setLoading] = useState(false)
   const [err, setErr] = useState('')
 
@@ -52,6 +55,8 @@ export default function BiAnalytics({ datasetId, dateFrom, dateTo }) {
       setSummary(null)
       setCharts(null)
       setInsights(null)
+      setInsightsBlocked(false)
+      setSummaryBlockedUpgrade(false)
       return
     }
     const params = { dataset_id: Number(datasetId) }
@@ -61,23 +66,40 @@ export default function BiAnalytics({ datasetId, dateFrom, dateTo }) {
     let cancelled = false
     setLoading(true)
     setErr('')
-    Promise.all([
+    setInsightsBlocked(false)
+    setSummaryBlockedUpgrade(false)
+    Promise.allSettled([
       api.get('/dashboard/summary', { params }),
       api.get('/dashboard/charts', { params }),
       api.get('/dashboard/insights', { params }),
     ])
-      .then(([s, c, i]) => {
+      .then(([sr, cr, ir]) => {
         if (cancelled) return
-        setSummary(s.data)
-        setCharts(c.data)
-        setInsights(i.data)
-      })
-      .catch((e) => {
-        if (cancelled) return
-        setErr(formatApiError(e, t))
-        setSummary(null)
-        setCharts(null)
-        setInsights(null)
+        const sumOk = sr.status === 'fulfilled'
+        const s403 = (x) => x.status === 'rejected' && x.reason?.response?.status === 403
+        if (sumOk) {
+          setSummary(sr.value.data)
+          setErr('')
+          setSummaryBlockedUpgrade(false)
+        } else {
+          setSummary(null)
+          if (s403(sr)) {
+            setErr(t('billing.biRequiresUpgrade'))
+            setSummaryBlockedUpgrade(true)
+          } else {
+            setErr(formatApiError(sr.reason, t))
+            setSummaryBlockedUpgrade(false)
+          }
+        }
+        if (cr.status === 'fulfilled') setCharts(cr.value.data)
+        else setCharts(null)
+        if (ir.status === 'fulfilled') {
+          setInsights(ir.value.data)
+          setInsightsBlocked(false)
+        } else {
+          setInsights(null)
+          if (s403(ir)) setInsightsBlocked(true)
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
@@ -85,7 +107,7 @@ export default function BiAnalytics({ datasetId, dateFrom, dateTo }) {
     return () => {
       cancelled = true
     }
-  }, [datasetId, dateFrom, dateTo, lang])
+  }, [datasetId, dateFrom, dateTo, lang, t])
 
   if (!datasetId) {
     return (
@@ -108,6 +130,14 @@ export default function BiAnalytics({ datasetId, dateFrom, dateTo }) {
       <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
         <p className="font-medium">{t('bi.unavailable')}</p>
         <p className="mt-1 text-amber-800/90">{err}</p>
+        {summaryBlockedUpgrade && (
+          <Link
+            to="/billing"
+            className="inline-block mt-3 text-sm font-medium text-brand-700 hover:underline"
+          >
+            {t('billing.goToBilling')}
+          </Link>
+        )}
       </div>
     )
   }
@@ -139,6 +169,15 @@ export default function BiAnalytics({ datasetId, dateFrom, dateTo }) {
         <h2 className="text-lg font-semibold text-slate-900">{t('bi.title')}</h2>
         <p className="text-sm text-slate-600 mt-0.5">{t('bi.subtitle')}</p>
       </div>
+
+      {insightsBlocked && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-950">
+          <p>{t('billing.insightsUpgrade')}</p>
+          <Link to="/billing" className="mt-2 inline-block font-medium text-brand-700 hover:underline">
+            {t('billing.goToBilling')}
+          </Link>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-5 rounded-2xl bg-gradient-to-br from-sky-50 to-white border border-sky-100 shadow-sm">

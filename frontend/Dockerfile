@@ -3,7 +3,8 @@ WORKDIR /app
 COPY package.json ./
 RUN npm install
 COPY . .
-ARG VITE_API_URL=http://localhost:8000
+# Leave empty for same-origin /api (nginx proxies to backend). Override only if the UI and API use different public URLs.
+ARG VITE_API_URL=
 ENV VITE_API_URL=$VITE_API_URL
 RUN npm run build
 

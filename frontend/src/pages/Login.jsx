@@ -107,6 +107,19 @@ export default function Login() {
               {t('login.register')}
             </Link>
           </p>
+          <p className="mt-4 text-center text-xs text-slate-500">
+            <Link to="/terms" className="text-brand-600 hover:underline">
+              {t('legal.termsNav')}
+            </Link>
+            {' · '}
+            <Link to="/privacy" className="text-brand-600 hover:underline">
+              {t('legal.privacyNav')}
+            </Link>
+            {' · '}
+            <Link to="/refunds" className="text-brand-600 hover:underline">
+              {t('legal.refundsNav')}
+            </Link>
+          </p>
         </div>
       </div>
     </div>

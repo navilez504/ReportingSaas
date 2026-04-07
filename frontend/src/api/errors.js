@@ -30,6 +30,26 @@ const BACKEND_DETAIL_TO_KEY = {
   'Invalid token subject': 'errors.invalidTokenSubject',
   'User not found': 'errors.userNotFound',
   'Admin role required': 'errors.adminRequired',
+  'This account has been deactivated': 'errors.accountDeactivated',
+  'Your session is no longer valid. Please sign in again.': 'errors.sessionInvalid',
+  'Su sesión ya no es válida. Inicie sesión de nuevo.': 'errors.sessionInvalid',
+  'Your trial has expired. Contact support or upgrade to continue.': 'errors.trialExpired',
+  'You have reached the file limit for your plan.': 'errors.fileLimitReached',
+  'Upload is not allowed for your current subscription.': 'errors.trialExpired',
+  'Esta cuenta ha sido desactivada': 'errors.accountDeactivated',
+  'Su periodo de prueba ha finalizado. Contacte soporte o mejore su plan para continuar.':
+    'errors.trialExpired',
+  'Ha alcanzado el límite de archivos de su plan.': 'errors.fileLimitReached',
+  'No está permitida la subida con su suscripción actual.': 'errors.trialExpired',
+  'This feature is not included in your current plan. Upgrade to unlock it.':
+    'errors.planFeatureNotAvailable',
+  'Esta función no está incluida en su plan actual. Mejore el plan para desbloquearla.':
+    'errors.planFeatureNotAvailable',
+  'Online billing is not configured on this server.': 'errors.stripeNotConfigured',
+  'La facturación en línea no está configurada en este servidor.': 'errors.stripeNotConfigured',
+  'Complete a subscription checkout first to manage billing.': 'errors.stripePortalRequiresCustomer',
+  'Complete primero el pago de una suscripción para gestionar la facturación.':
+    'errors.stripePortalRequiresCustomer',
 }
 
 function translateDetailString(raw, t) {

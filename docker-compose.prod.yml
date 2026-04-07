@@ -8,10 +8,12 @@ services:
     restart: unless-stopped
 
   backend:
+    env_file:
+      - .env.production
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-reporting}:${POSTGRES_PASSWORD:-change-me-in-production}@postgres:5432/${POSTGRES_DB:-reporting_db}}
-      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in your production env file}
-      CORS_ORIGINS: ${CORS_ORIGINS:-https://example.com}
+      UPLOAD_DIR: /data/uploads
+      REPORTS_DIR: /data/reports
       DEBUG: "false"
     ports:
       - "127.0.0.1:8001:8000"

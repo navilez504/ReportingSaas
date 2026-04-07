@@ -91,6 +91,14 @@ export default function Dashboard() {
   const [chartY, setChartY] = useState('')
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
+  const [planSummary, setPlanSummary] = useState(null)
+
+  useEffect(() => {
+    api
+      .get('/dashboard/plan-summary')
+      .then((r) => setPlanSummary(r.data))
+      .catch(() => setPlanSummary(null))
+  }, [])
 
   useEffect(() => {
     api
@@ -172,6 +180,30 @@ export default function Dashboard() {
         <h1 className="text-2xl font-semibold text-slate-900">{t('dashboard.title')}</h1>
         <p className="text-slate-600 mt-1">{t('dashboard.subtitle')}</p>
       </div>
+
+      {planSummary?.plan === 'trial' && !planSummary.trial_expired && (
+        <div className="rounded-xl border border-brand-200 bg-brand-50/90 px-4 py-3 text-sm text-brand-900">
+          {t('dashboard.trialBanner')}
+          {planSummary.trial_days_remaining != null && (
+            <span className="block mt-1 text-brand-800">
+              {t('upload.trialDaysLeft').replace(
+                '{days}',
+                String(Math.ceil(planSummary.trial_days_remaining)),
+              )}
+            </span>
+          )}
+        </div>
+      )}
+      {planSummary?.trial_expired && (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
+          {t('upload.trialExpiredUpload')}
+        </div>
+      )}
+      {planSummary?.notifications?.includes('file_limit_reached') && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          {t('upload.notifyLimit')}
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-4 items-end">
         <div>

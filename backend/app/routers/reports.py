@@ -12,6 +12,7 @@ from app.repositories.custom_metric import CustomMetricRepository
 from app.repositories.report import ReportRepository
 from app.schemas.report import ReportCreate, ReportOut
 from app.services.dashboard import DashboardService
+from app.services.plan import ensure_account_can_write, ensure_plan_feature
 from app.services.report_pdf import ReportPdfService
 
 router = APIRouter(prefix="/reports", tags=["reports"])
@@ -27,7 +28,10 @@ def create_report(
     data: ReportCreate,
     db: Session = Depends(get_db),
     current: User = Depends(get_current_user),
+    lang: str = Depends(get_locale),
 ):
+    ensure_account_can_write(current, lang)
+    ensure_plan_feature(current, "pdf_reports", lang)
     svc = _pdf_service(db)
     report = svc.generate_pdf(
         current.id,

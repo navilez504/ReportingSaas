@@ -13,9 +13,14 @@ export default function Register() {
   const [fullName, setFullName] = useState('')
   const [err, setErr] = useState('')
   const [loading, setLoading] = useState(false)
+  const [agreedLegal, setAgreedLegal] = useState(false)
 
   async function onSubmit(e) {
     e.preventDefault()
+    if (!agreedLegal) {
+      setErr(t('register.legalRequired'))
+      return
+    }
     setErr('')
     setLoading(true)
     try {
@@ -62,10 +67,29 @@ export default function Register() {
             className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
           />
         </div>
+        <label className="flex items-start gap-2 text-sm text-slate-700">
+          <input
+            type="checkbox"
+            checked={agreedLegal}
+            onChange={(e) => setAgreedLegal(e.target.checked)}
+            className="mt-1 rounded border-slate-300"
+          />
+          <span>
+            {t('register.agreeIntro')}{' '}
+            <Link to="/terms" className="text-brand-600 font-medium hover:underline" target="_blank" rel="noreferrer">
+              {t('legal.termsNav')}
+            </Link>
+            {t('register.agreeAnd')}{' '}
+            <Link to="/privacy" className="text-brand-600 font-medium hover:underline" target="_blank" rel="noreferrer">
+              {t('legal.privacyNav')}
+            </Link>
+            {t('register.agreeOutro')}
+          </span>
+        </label>
         {err && <p className="text-sm text-red-600">{typeof err === 'string' ? err : JSON.stringify(err)}</p>}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !agreedLegal}
           className="w-full py-2.5 rounded-lg bg-brand-600 text-white font-medium hover:bg-brand-500 disabled:opacity-50"
         >
           {loading ? t('register.creating') : t('register.submit')}
@@ -75,6 +99,11 @@ export default function Register() {
         {t('register.hasAccount')}{' '}
         <Link to="/login" className="text-brand-600 font-medium hover:underline">
           {t('register.signIn')}
+        </Link>
+      </p>
+      <p className="mt-4 text-xs text-slate-500 text-center">
+        <Link to="/refunds" className="text-brand-600 hover:underline">
+          {t('legal.refundsNav')}
         </Link>
       </p>
     </div>

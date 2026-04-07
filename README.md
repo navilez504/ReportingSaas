@@ -18,7 +18,7 @@ API routes are prefixed with `/api`:
 | Dashboard  | `/api/dashboard` |
 | Reports    | `/api/reports` |
 
-The first registered user becomes **admin**; subsequent users are **user**.
+**Admin** is not automatic. Set **`ADMIN_EMAILS`** in `.env` (comma-separated addresses). Those accounts get `role=admin` when they register, on login, on `GET /api/users/me`, and on API startup. Everyone else registers as a normal **user**.
 
 ## Quick start (Docker)
 
@@ -28,7 +28,7 @@ The first registered user becomes **admin**; subsequent users are **user**.
    cp .env.example .env
    ```
 
-   Set `SECRET_KEY` to a long random string. Adjust `VITE_API_URL` if ports differ (browser must reach the API; default `http://localhost:8000`).
+   Set `SECRET_KEY` to a long random string. Set **`ADMIN_EMAILS`** to your own email (and any other admins), e.g. `ADMIN_EMAILS=you@company.com`. Leave **`VITE_API_URL` empty** for Docker: the UI is served on port 80 and nginx proxies `/api` to the backend, so the browser does not call `:8000` directly. Set `VITE_API_URL` only if you host the static UI and API on different public URLs.
 
 2. Build and run with the local-development overlay:
 
@@ -36,7 +36,7 @@ The first registered user becomes **admin**; subsequent users are **user**.
    docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
    ```
 
-3. Open **http://localhost** for the UI and **http://localhost:8000/docs** for OpenAPI. Register, upload a `.csv` or `.xlsx`, then open the dashboard and generate a PDF report.
+3. Open **http://localhost** for the UI and **http://localhost:8000/docs** for OpenAPI. Register with an address listed in **`ADMIN_EMAILS`** if you need the Admin panel; other addresses are regular users. Upload a `.csv` or `.xlsx`, then open the dashboard and generate a PDF report.
 
 Volumes persist Postgres data, uploads, and generated PDFs.
 
@@ -69,6 +69,9 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.
    - `POSTGRES_PASSWORD`
    - `CORS_ORIGINS`
    - `VITE_API_URL`
+   - `ADMIN_EMAILS` and `PUBLIC_APP_URL`
+   - `SMTP_*` if you want trial reminders and payment emails (Gmail: App Password; `SMTP_FROM` usually matches `SMTP_USER`)
+   - optional Stripe price IDs and keys when billing is live
    - optionally `DATABASE_URL` if you use AWS RDS instead of the bundled Postgres container
 
 3. Start the stack:
@@ -95,6 +98,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.
 
 ### Production notes
 
+- **Email not sending?** The API loads `.env` from the **project root** and `backend/.env`, and Docker also passes `SMTP_*` from the shell env used at `docker compose` time. You need **`SMTP_HOST`**, **`SMTP_USER`**, and **`SMTP_PASSWORD`** (and usually **`SMTP_FROM`** = same as user for Gmail). Check **`GET /health`** → `"smtp_configured": true` after deploy. If you only keep secrets in **`.env.production`**, run compose with `--env-file .env.production` or copy those variables into the project **`.env`** file Compose loads by default.
 - Do not expose PostgreSQL publicly in production.
 - Keep only ports `22`, `80`, and `443` open in the EC2 security group.
 - Prefer a read-only GitHub deploy key on the server.
@@ -123,6 +127,8 @@ alembic upgrade head
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
+Before accepting real payments, see **[docs/GO_LIVE.md](docs/GO_LIVE.md)** (Stripe webhooks, `PUBLIC_APP_URL`, backups, secrets).
+
 WeasyPrint needs system libraries on macOS/Linux (e.g. Pango/Cairo). On macOS: `brew install pango cairo gdk-pixbuf libffi`.
 
 ### Frontend
@@ -130,11 +136,12 @@ WeasyPrint needs system libraries on macOS/Linux (e.g. Pango/Cairo). On macOS: `
 ```bash
 cd frontend
 npm install
-echo 'VITE_API_URL=http://localhost:8000' > .env.development
 npm run dev
 ```
 
-Visit **http://localhost:5173**.
+Visit **http://localhost:5173**. The dev server proxies **`/api`** to **`http://127.0.0.1:8000`** (override with env **`VITE_API_PROXY_TARGET`** if needed). Leave **`VITE_API_URL`** unset so the app uses relative `/api` like in Docker.
+
+If the UI and API run on different hosts during dev, set `VITE_API_URL` to the API origin (no trailing slash) in `.env.development.local`.
 
 ## Security notes
 

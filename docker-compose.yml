@@ -17,10 +17,13 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    # Load project `.env` into the container (SMTP, Stripe, ADMIN_EMAILS, etc.). Compose `${VAR:-}`
+    # interpolation often does not see this file on all setups, which left SMTP_* empty before.
+    env_file:
+      - .env
     environment:
+      # Overrides .env so the API talks to the compose Postgres service, not localhost.
       DATABASE_URL: postgresql://${POSTGRES_USER:-reporting}:${POSTGRES_PASSWORD:-reporting}@postgres:5432/${POSTGRES_DB:-reporting_db}
-      SECRET_KEY: ${SECRET_KEY:-change-me-use-long-random-secret-in-production}
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost,http://localhost:5173,http://127.0.0.1:5173}
       UPLOAD_DIR: /data/uploads
       REPORTS_DIR: /data/reports
       DEBUG: "false"
@@ -42,7 +45,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+        # Empty = browser uses /api on the same host (nginx → backend). Set only for split static/API hosting.
+        VITE_API_URL: ${VITE_API_URL:-}
     depends_on:
       - backend
 

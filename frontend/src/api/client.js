@@ -1,10 +1,15 @@
 import axios from 'axios'
 
-const raw = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-const baseURL = String(raw).replace(/\/+$/, '')
+/**
+ * If VITE_API_URL is set (non-empty), call that host + /api (common for split deploys).
+ * Otherwise use same-origin `/api` — Docker nginx and Vite dev proxy forward to the backend.
+ */
+const explicit = import.meta.env.VITE_API_URL
+const useExplicit = explicit != null && String(explicit).trim() !== ''
+const baseURL = useExplicit ? `${String(explicit).replace(/\/+$/, '')}/api` : '/api'
 
 export const api = axios.create({
-  baseURL: `${baseURL}/api`,
+  baseURL,
   headers: { 'Content-Type': 'application/json' },
 })
 

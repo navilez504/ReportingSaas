@@ -23,6 +23,10 @@ MESSAGES: dict[str, dict[MsgLang, str]] = {
         "en": "User not found",
         "es": "Usuario no encontrado",
     },
+    "session_not_found": {
+        "en": "Session not found",
+        "es": "Sesión no encontrada",
+    },
     "admin_role_required": {
         "en": "Admin role required",
         "es": "Se requiere rol de administrador",
@@ -86,6 +90,42 @@ MESSAGES: dict[str, dict[MsgLang, str]] = {
     "upload_dataset_kpis": {
         "en": "Upload a dataset to see KPIs",
         "es": "Suba un conjunto de datos para ver los KPIs",
+    },
+    "account_deactivated": {
+        "en": "This account has been deactivated",
+        "es": "Esta cuenta ha sido desactivada",
+    },
+    "trial_expired": {
+        "en": "Your trial has expired. Contact support or upgrade to continue.",
+        "es": "Su periodo de prueba ha finalizado. Contacte soporte o mejore su plan para continuar.",
+    },
+    "file_limit_reached": {
+        "en": "You have reached the file limit for your plan.",
+        "es": "Ha alcanzado el límite de archivos de su plan.",
+    },
+    "upload_not_allowed": {
+        "en": "Upload is not allowed for your current subscription.",
+        "es": "No está permitida la subida con su suscripción actual.",
+    },
+    "invalid_plan": {
+        "en": "Invalid plan. Use trial, starter, pro, or enterprise.",
+        "es": "Plan no válido. Use trial, starter, pro o enterprise.",
+    },
+    "plan_feature_not_available": {
+        "en": "This feature is not included in your current plan. Upgrade to unlock it.",
+        "es": "Esta función no está incluida en su plan actual. Mejore el plan para desbloquearla.",
+    },
+    "stripe_not_configured": {
+        "en": "Online billing is not configured on this server.",
+        "es": "La facturación en línea no está configurada en este servidor.",
+    },
+    "stripe_customer_required_for_portal": {
+        "en": "Complete a subscription checkout first to manage billing.",
+        "es": "Complete primero el pago de una suscripción para gestionar la facturación.",
+    },
+    "session_invalid": {
+        "en": "Your session is no longer valid. Please sign in again.",
+        "es": "Su sesión ya no es válida. Inicie sesión de nuevo.",
     },
 }
 

@@ -24,10 +24,15 @@ export default function Reports() {
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
   const [err, setErr] = useState('')
+  const [plan, setPlan] = useState(null)
 
   function load() {
     api.get('/reports').then((r) => setReports(r.data))
     api.get('/upload/datasets').then((r) => setDatasets(r.data))
+    api
+      .get('/dashboard/plan-summary')
+      .then((r) => setPlan(r.data))
+      .catch(() => setPlan(null))
   }
 
   useEffect(() => {
@@ -36,6 +41,7 @@ export default function Reports() {
 
   async function generate(e) {
     e.preventDefault()
+    if (plan && plan.can_write === false) return
     setErr('')
     setMsg('')
     setLoading(true)
@@ -61,6 +67,12 @@ export default function Reports() {
           {t('reports.languageHint')}: <span className="font-medium uppercase">{lang}</span>
         </p>
       </div>
+
+      {plan?.trial_expired && (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
+          {t('upload.trialExpiredUpload')}
+        </div>
+      )}
 
       <form onSubmit={generate} className="p-8 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <div>
@@ -91,7 +103,7 @@ export default function Reports() {
         {msg && <p className="text-sm text-emerald-600">{msg}</p>}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || (plan && plan.can_write === false)}
           className="px-5 py-2.5 rounded-lg bg-brand-600 text-white font-medium hover:bg-brand-500 disabled:opacity-50"
         >
           {loading ? t('reports.generating') : t('reports.generate')}

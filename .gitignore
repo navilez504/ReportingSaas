@@ -1,4 +1,13 @@
+# Secrets — never commit real values (use .env.example / .env.production.example only)
 .env
+.env.production
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+frontend/.env.*
+
+# Python / Node / build
 backend/.venv/
 backend/__pycache__/
 backend/uploads/
@@ -7,3 +16,17 @@ backend/reports/
 frontend/node_modules/
 frontend/dist/
 .DS_Store
+
+# Keys and certificates
+*.pem
+*.p12
+id_rsa
+id_rsa.pub
+*.key
+
+# Misplaced SSH material in repo root (quoted filenames)
+"test"
+"test".pub
+
+# Accidental nested clone
+ReportingSaas/

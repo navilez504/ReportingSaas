@@ -24,7 +24,7 @@ async def upload_file(
     lang = parse_accept_language(accept_language)
     repo = DatasetRepository(db)
     svc = UploadService(repo)
-    ds = await svc.process_upload(current.id, file, name, lang=lang)
+    ds = await svc.process_upload(current, file, name, lang=lang)
     return DatasetOut.model_validate(ds)
 
 

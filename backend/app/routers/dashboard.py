@@ -11,6 +11,8 @@ from app.repositories.custom_metric import CustomMetricRepository
 from app.repositories.dataset import DatasetRepository
 from app.schemas.bi import BIChartsResponse, BIInsightsResponse, BISummaryResponse
 from app.schemas.dashboard import CustomMetricCreate, CustomMetricOut, DashboardResponse
+from app.schemas.plan_summary import PlanSummaryResponse
+from app.services.plan import build_plan_summary, ensure_plan_feature
 from app.models.custom_metric import CustomMetric
 from app.services.dashboard import DashboardService
 
@@ -38,6 +40,16 @@ def get_dashboard(
     )
 
 
+@router.get("/plan-summary", response_model=PlanSummaryResponse)
+def get_plan_summary(
+    db: Session = Depends(get_db),
+    current: User = Depends(get_current_user),
+    lang: str = Depends(get_locale),
+):
+    """Subscription and upload-limit KPIs (BI metrics remain at GET /dashboard/summary)."""
+    return PlanSummaryResponse.model_validate(build_plan_summary(current, db, lang))
+
+
 @router.get("/summary", response_model=BISummaryResponse)
 def get_bi_summary(
     db: Session = Depends(get_db),
@@ -47,6 +59,7 @@ def get_bi_summary(
     date_from: Optional[date] = Query(None),
     date_to: Optional[date] = Query(None),
 ):
+    ensure_plan_feature(current, "bi_summary", lang)
     return _dash_service(db).get_bi_summary(current.id, dataset_id, date_from, date_to, lang=lang)
 
 
@@ -59,6 +72,7 @@ def get_bi_charts(
     date_from: Optional[date] = Query(None),
     date_to: Optional[date] = Query(None),
 ):
+    ensure_plan_feature(current, "bi_charts", lang)
     return _dash_service(db).get_bi_charts(current.id, dataset_id, date_from, date_to, lang=lang)
 
 
@@ -71,6 +85,7 @@ def get_bi_insights(
     date_from: Optional[date] = Query(None),
     date_to: Optional[date] = Query(None),
 ):
+    ensure_plan_feature(current, "bi_insights", lang)
     return _dash_service(db).get_bi_insights(current.id, dataset_id, date_from, date_to, lang=lang)
 
 

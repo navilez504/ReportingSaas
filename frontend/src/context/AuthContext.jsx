@@ -35,9 +35,18 @@ export function AuthProvider({ children }) {
     return data.user
   }, [])
 
-  const logout = useCallback(() => {
-    setAuthToken(null)
-    setUser(null)
+  const logout = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token')
+      if (token) {
+        await api.post('/auth/logout')
+      }
+    } catch {
+      /* still clear local session */
+    } finally {
+      setAuthToken(null)
+      setUser(null)
+    }
   }, [])
 
   const value = useMemo(

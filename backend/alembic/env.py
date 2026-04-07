@@ -9,7 +9,16 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from app.db import Base
 from app.core.config import get_settings
-from app.models import user, dataset, report, custom_metric  # noqa: F401
+from app.models import (  # noqa: F401
+    user,
+    organization,
+    dataset,
+    report,
+    custom_metric,
+    user_session,
+    audit_log,
+    stripe_webhook_event,
+)
 
 config = context.config
 if config.config_file_name is not None:

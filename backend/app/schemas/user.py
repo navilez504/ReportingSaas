@@ -11,6 +11,11 @@ class UserOut(BaseModel):
     email: EmailStr
     full_name: str
     role: UserRole
+    plan: str
+    trial_started_at: Optional[datetime] = None
+    is_active: bool = True
+    organization_id: Optional[int] = None
+    subscription_status: Optional[str] = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

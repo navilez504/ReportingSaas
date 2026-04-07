@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { isAdminUser } from '../utils/roles'
 import { GuideProvider, useGuide } from '../context/GuideContext'
 import { useLanguage } from '../context/LanguageContext'
 import GuideTour from './GuideTour'
@@ -8,8 +9,7 @@ function LayoutShell() {
   const { user, logout } = useAuth()
   const { lang, setLang, t } = useLanguage()
   const { startTour } = useGuide()
-  const roleLabel =
-    String(user?.role || '').toLowerCase() === 'admin' ? t('layout.roleAdmin') : t('layout.roleUser')
+  const roleLabel = isAdminUser(user) ? t('layout.roleAdmin') : t('layout.roleUser')
   const link = 'px-3 py-2 rounded-lg text-sm font-medium transition-colors'
   const active = 'bg-brand-600 text-white'
   const idle = 'text-slate-600 hover:bg-slate-100'
@@ -44,6 +44,20 @@ function LayoutShell() {
             >
               {t('layout.reports')}
             </NavLink>
+            <NavLink
+              to="/billing"
+              className={({ isActive }) => `${link} ${isActive ? active : idle}`}
+            >
+              {t('layout.billing')}
+            </NavLink>
+            {isAdminUser(user) && (
+              <NavLink
+                to="/admin"
+                className={({ isActive }) => `${link} ${isActive ? active : idle}`}
+              >
+                {t('layout.admin')}
+              </NavLink>
+            )}
           </nav>
           <div className="flex items-center gap-2 sm:gap-3 text-sm text-slate-600 flex-wrap justify-end">
             <button

@@ -9,7 +9,9 @@ from fastapi import HTTPException, UploadFile, status
 from app.core.api_messages import api_msg
 from app.core.config import get_settings
 from app.models.dataset import Dataset
+from app.models.user import User
 from app.repositories.dataset import DatasetRepository
+from app.services.plan import ensure_upload_allowed
 from app.services.tabular import (
     coerce_typed_columns,
     read_csv_bytes,
@@ -90,12 +92,14 @@ class UploadService:
 
     async def process_upload(
         self,
-        user_id: int,
+        user: User,
         file: UploadFile,
         display_name: str | None,
         lang: str = "en",
     ) -> Dataset:
         settings = get_settings()
+        ensure_upload_allowed(user, self.repo.db, lang)
+        user_id = user.id
         if not file.filename:
             raise HTTPException(status_code=400, detail=api_msg("filename_required", lang))
         ext = Path(file.filename).suffix.lower()
