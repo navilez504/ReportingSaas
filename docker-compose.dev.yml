@@ -4,6 +4,8 @@ services:
       - "5432:5432"
 
   backend:
+    env_file:
+      - .env
     ports:
       - "8000:8000"
 

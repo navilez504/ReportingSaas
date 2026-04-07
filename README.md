@@ -98,7 +98,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.
 
 ### Production notes
 
-- **Email not sending?** The API loads `.env` from the **project root** and `backend/.env`, and Docker also passes `SMTP_*` from the shell env used at `docker compose` time. You need **`SMTP_HOST`**, **`SMTP_USER`**, and **`SMTP_PASSWORD`** (and usually **`SMTP_FROM`** = same as user for Gmail). Check **`GET /health`** → `"smtp_configured": true` after deploy. If you only keep secrets in **`.env.production`**, run compose with `--env-file .env.production` or copy those variables into the project **`.env`** file Compose loads by default.
+- **Email not sending?** Set **`SMTP_HOST`**, **`SMTP_USER`**, **`SMTP_PASSWORD`**, **`SMTP_FROM`** in the env file the stack uses: **`.env.production`** is loaded into the backend container when you use **`docker-compose.prod.yml`**; local Docker with **`docker-compose.dev.yml`** loads **`.env`**. Non-Docker runs use project **`backend/.env`** or root **`.env`** (see [backend app config](backend/app/core/config.py)). Check **`GET /health`** → **`"smtp_configured": true`**.
 - Do not expose PostgreSQL publicly in production.
 - Keep only ports `22`, `80`, and `443` open in the EC2 security group.
 - Prefer a read-only GitHub deploy key on the server.

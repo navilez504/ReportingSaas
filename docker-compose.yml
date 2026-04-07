@@ -17,10 +17,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    # Load project `.env` into the container (SMTP, Stripe, ADMIN_EMAILS, etc.). Compose `${VAR:-}`
-    # interpolation often does not see this file on all setups, which left SMTP_* empty before.
-    env_file:
-      - .env
+    # Container env for secrets: use docker-compose.dev.yml (`.env`) or docker-compose.prod.yml (`.env.production`).
     environment:
       # Overrides .env so the API talks to the compose Postgres service, not localhost.
       DATABASE_URL: postgresql://${POSTGRES_USER:-reporting}:${POSTGRES_PASSWORD:-reporting}@postgres:5432/${POSTGRES_DB:-reporting_db}
