@@ -80,6 +80,10 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.
    docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production up -d --build
    ```
 
+   If **`reportingsaas-backend-1` keeps restarting** and **`curl http://127.0.0.1:8001/health`** fails, check logs:  
+   `docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production logs backend --tail 80`  
+   A common cause was an invalid **`DATABASE_URL`** from nested Compose interpolation; **`docker-compose.prod.yml`** now builds it from **`POSTGRES_*`** only. Ensure **`POSTGRES_PASSWORD`** in `.env.production` matches what Postgres was initialized with (if the DB volume already existed with another password, fix `.env.production` or reset the volume). Characters like **`@` `:` `#` in the password** must be **URL-encoded** inside `DATABASE_URL` if you set it manually (e.g. for RDS use **`docker-compose.rds.yml`**).
+
 4. Install the sample Nginx site config from `deploy/nginx/reportingsaas.conf`, replace `example.com`, then enable it:
 
    ```bash

@@ -1,0 +1,17 @@
+# Optional: use Amazon RDS (or any external Postgres) instead of the bundled postgres service.
+#
+# 1. Set DATABASE_URL in .env.production, e.g.
+#    DATABASE_URL=postgresql://USER:PASSWORD@your-rds.amazonaws.com:5432/reporting_db
+#    (URL-encode special characters in USER/PASSWORD if needed.)
+# 2. Run compose with this file **after** docker-compose.prod.yml so it overrides DATABASE_URL:
+#
+#    docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.rds.yml \
+#      --env-file .env.production up -d --build
+#
+# 3. Stop/remove the unused postgres service or keep it unused — for a minimal prod VM you can
+#    comment out the `postgres` service in a local override if you prefer.
+
+services:
+  backend:
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in .env.production for RDS}

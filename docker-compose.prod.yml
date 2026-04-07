@@ -11,7 +11,10 @@ services:
     env_file:
       - .env.production
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-reporting}:${POSTGRES_PASSWORD:-change-me-in-production}@postgres:5432/${POSTGRES_DB:-reporting_db}}
+      # Do not nest ${VAR:-...} inside another default (Compose often fails to expand it).
+      # Use POSTGRES_* from .env.production (via --env-file) for this URL. For RDS, use a compose override
+      # that sets DATABASE_URL and omit this key in the override.
+      DATABASE_URL: postgresql://${POSTGRES_USER:-reporting}:${POSTGRES_PASSWORD:-reporting}@postgres:5432/${POSTGRES_DB:-reporting_db}
       UPLOAD_DIR: /data/uploads
       REPORTS_DIR: /data/reports
       DEBUG: "false"
