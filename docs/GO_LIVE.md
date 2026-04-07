@@ -35,3 +35,24 @@ Use this before taking real payments. It complements `.env.example` and Docker/R
 ## Reconciliation
 
 - The API runs a **daily Stripe reconciliation** job (subscription rows vs Stripe). Monitor logs for `Stripe reconciliation updated` and webhook errors.
+
+## Postgres: `password authentication failed for user "reporting"`
+
+The bundled Postgres image sets the **`reporting`** user password **only on first start**, when the **`pgdata` volume is empty**. After that, changing **`POSTGRES_PASSWORD`** in `.env.production` does **not** change the database password—the backend will still need the password that was used when the volume was created.
+
+**Fix (pick one):**
+
+1. **Keep existing data** — Set **`POSTGRES_PASSWORD`** in `.env.production` to the **same** password that was used the first time the stack created the DB volume (and redeploy so the backend’s `DATABASE_URL` matches).
+
+2. **Reset DB (destroys all data)** — From the app directory:
+
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production down
+   docker volume ls | grep pgdata   # note exact volume name, e.g. reportingsaas_pgdata
+   docker volume rm THAT_VOLUME_NAME
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production up -d --build
+   ```
+
+   Then Postgres boots with the **`POSTGRES_PASSWORD`** currently in `.env.production`.
+
+Ensure **`POSTGRES_USER`**, **`POSTGRES_PASSWORD`**, and **`POSTGRES_DB`** in `.env.production` match what you intend; the backend URL is built from these values in `docker-compose.prod.yml`. Passwords with **`@` `: `#` `%` `+`** must be **URL-encoded** if you ever set **`DATABASE_URL`** manually.
